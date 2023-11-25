@@ -3,9 +3,9 @@ function (pixelCount) {
   map = [];
   for (i = 0; i < pixelCount; i++) {
     pixel = i + 1
-    spar = Math.floor((i)/(pixelCount/sparCount))+1 
-    sparPixel = pixel-(spar-1)*(pixelCount/sparCount)
-    theta = (spar-1) * (360/sparCount)
+    spar = Math.floor((i)/(pixelCount/sparCount))
+    sparPixel = pixel-(spar)*(pixelCount/sparCount)
+    theta = (spar) * (360/sparCount)
     distance = 1/(2*pixelCount/sparCount+1)*sparPixel
     x = 0.5 + distance * Math.sin(theta * Math.PI / 180) 
     y = 0.5 + distance*Math.cos(theta * Math.PI / 180)
