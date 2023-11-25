@@ -1,0 +1,150 @@
+export var ext_h = 0.524994
+export var ext_s = 0.1
+var speed = .5
+var news
+var spread = 5
+var oldh = 0
+var olds = 1
+var timer2
+var baseBrightness = 0.75
+var effective = array(pixelCount)
+var strands = 4
+var pixelsPerStrand = pixelCount/strands
+export var left = 1
+export var right = 1
+export var tv = 0
+
+firstrun = 1
+
+export var sparkle = 0
+var numberOfTwinkles = 15
+var twinkleTime = 10
+export var twinkle = array(numberOfTwinkles)
+export var twinklebrightness = array(numberOfTwinkles)
+
+export function sliderextH(v) {
+    ext_h = v
+    counter = 0
+}
+
+export function sliderextS(v) {
+    ext_s = v
+    counter = 0
+}
+
+export function beforeRender(delta) {
+//if this is the first time running, calculate the effective pixel array for later
+  if (firstrun == 1)
+  {
+    mycounter = 0
+    firstrun = 0
+    for (j =0; j < strands / 2; j++)
+      {
+        for (i=0; i < pixelsPerStrand; i++)
+        {
+          effective[myCounter] = i
+          myCounter = myCounter + 1
+        }
+        for (i=0; i < pixelsPerStrand; i++)
+        {
+          effective[myCounter] = (pixelsPerStrand - i - 1)
+          myCounter = myCounter + 1
+        }
+      } 
+    for (j =0; j < numberOfTwinkles; j++)
+    {
+      twinkle[j] = j
+      twinklebrightness[j] = 0.75
+    }  
+      twinklebrightness[floor((numberOfTwinkles + 1)/2)] = 1
+  }
+
+  if (newh != ext_h)
+  {
+    newh = ext_h
+    counter = 0
+  }
+  
+  if (news != ext_s)
+  {
+    news = ext_s
+    counter = 0
+  }
+  
+  timer += delta
+  if (timer > 1)
+  {
+    counter += speed
+    timer = 0
+  }
+  if (counter >= pixelCount/2)
+  {
+    oldh=newh
+    olds=news
+    counter = 0
+  }
+  timer2 += delta // Accumulate all the deltas into a timer
+  if (timer2 > twinkleTime) { 
+    timer2 = 0
+    for (j =0; j < numberOfTwinkles - 1; j++)
+    {
+      twinkle[j] = twinkle[j+1]
+      twinklebrightness[j] =  twinklebrightness[j+1]
+    }
+    twinkle[numberOfTwinkles-1] = floor(random(1)*pixelCount)
+    twinklebrightness[numberOfTwinkles-1] = 1                         //        mix((1-baseBrightness/2),1,triangle(timer2/twinkleTime))
+  }
+}
+
+export function render(index) {
+  effectivePixel = effective[index]
+  myOnOff = right
+  if (index < pixelCount/2)
+    myOnOff = left
+  if (index < (pixelCount/4-3))
+    myOnOff = max(left - tv,0)
+
+  if((oldh != newh) || (olds != news))
+  {
+     currentwhite = counter-spread
+     if (effectivePixel > counter - spread)
+     {
+       myh=oldh
+       mys=olds
+     }
+     else
+     {
+       myh=newh
+       mys=news
+     }
+    if (abs(effectivePixel - currentwhite) < spread)
+    {
+      mys = min(max(abs(effectivePixel - currentwhite)/spread+0.5,0),mys)
+      mys = sqrt(mys)
+    }
+  }
+  else
+  {
+    myh = newh
+    mys = news
+  }
+  
+  l = 1 
+  if (sparkle == 1)
+  {
+   l = baseBrightness
+   if (index == twinkle[0]) 
+   {
+     l = twinklebrightness[0]
+   }
+   if (index == twinkle[1])
+   {
+     l = twinklebrightness[1]
+   }
+   if (index == twinkle[2]) 
+   {
+     l = twinklebrightness[2]
+   }
+  } 
+  hsv(myh,mys,l*l*myOnOff)
+}
